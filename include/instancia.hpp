@@ -56,3 +56,6 @@ struct Instancia {
         return t;
     }
 };
+
+// Lê uma instância do arquivo (implementada quando o formato for conhecido).
+Instancia lerInstancia(const std::string& caminho);
