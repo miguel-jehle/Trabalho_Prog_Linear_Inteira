@@ -82,11 +82,12 @@ void ModeloPMCOI::criarVariaveis() {
             x_[s][b] = modelo_->addVar(0.0, GRB_INFINITY, 0.0, GRB_CONTINUOUS,
                                        nome("x_" + to_string(s) + "_" + to_string(b)));
 
-    // y_sb ∈ {0,1}, s ∈ S̄, b ∈ B (s atende b)
+    // y_sb ∈ {0,1}, s ∈ S̄, b ∈ B (s atende b); fixa em 0 se a aresta (b, s)
+    // foi removida no pré-processamento
     y_.assign(nTotal, std::vector<GRBVar>(nB));
     for (int s = 0; s < nTotal; ++s)
         for (int b = 0; b < nB; ++b)
-            y_[s][b] = modelo_->addVar(0.0, 1.0, 0.0, GRB_BINARY,
+            y_[s][b] = modelo_->addVar(0.0, inst_.temAresta(b, s) ? 1.0 : 0.0, 0.0, GRB_BINARY,
                                        nome("y_" + to_string(s) + "_" + to_string(b)));
 
     // w_sl ∈ {0,1}, s ∈ S, l ∈ L_s (volume de s está no intervalo l)

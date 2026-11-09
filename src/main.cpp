@@ -12,6 +12,7 @@
 
 #include "instancia.hpp"
 #include "modelo_pmcoi.hpp"
+#include "preprocessamento.hpp"
 
 namespace {
 
@@ -19,10 +20,13 @@ void uso(const char* prog) {
     std::cerr << "Uso: " << prog << " <instancia> [-t tempoLimite] [-o resultados.csv] [-q]\n";
 }
 
-void imprimirResultado(const Instancia& inst, const ResultadoModelo& r) {
+void imprimirResultado(const Instancia& original, const Instancia& inst, const ResultadoModelo& r) {
     std::cout << "\n===== Resultado =====\n"
               << "Instancia : " << inst.nome << "\n"
-              << "|S|=" << inst.nS() << "  |Sc|=" << inst.nSc() << "  |B|=" << inst.nB() << "\n"
+              << "Original  : |S|=" << original.nS() << "  |Sc|=" << original.nSc()
+              << "  |B|=" << original.nB() << "  arestas=" << original.nTotal() * original.nB() << "\n"
+              << "Pre-proc. : |S|P=" << inst.nS() << "  |Sc|P=" << inst.nSc()
+              << "  |B|=" << inst.nB() << "  arestas=" << contarArestas(inst) << "\n"
               << "Status    : " << r.status << "\n"
               << std::fixed << std::setprecision(2)
               << "FO_EX     : " << r.fo << "\n"
@@ -42,16 +46,18 @@ void imprimirResultado(const Instancia& inst, const ResultadoModelo& r) {
                   << " l=" << r.intervalo[s] << "\n";
 }
 
-void salvarCsv(const std::string& arquivo, const Instancia& inst, const ResultadoModelo& r) {
+void salvarCsv(const std::string& arquivo, const Instancia& original, const Instancia& inst,
+               const ResultadoModelo& r) {
     bool existe = std::ifstream(arquivo).good();
     std::ofstream out(arquivo, std::ios::app);
     if (!out) {
         std::cerr << "Nao foi possivel abrir " << arquivo << "\n";
         return;
     }
-    if (!existe) out << "instancia,S,Sc,B,status,FO_EX,limitante,gap,T_EX,nos\n";
+    if (!existe) out << "instancia,S,Sc,B,S_P,Sc_P,arestas,status,FO_EX,limitante,gap,T_EX,nos\n";
     out << std::fixed << std::setprecision(4)
-        << inst.nome << "," << inst.nS() << "," << inst.nSc() << "," << inst.nB() << ","
+        << inst.nome << "," << original.nS() << "," << original.nSc() << "," << original.nB() << ","
+        << inst.nS() << "," << inst.nSc() << "," << contarArestas(inst) << ","
         << r.status << "," << r.fo << "," << r.limitante << "," << r.gap << ","
         << r.tempo << "," << r.nos << "\n";
 }
@@ -80,14 +86,15 @@ int main(int argc, char* argv[]) {
     }
 
     try {
-        Instancia inst = lerInstancia(caminhoInstancia);
+        Instancia original = lerInstancia(caminhoInstancia);
+        Instancia inst = preprocessar(original);
 
         ModeloPMCOI modelo(inst, params);
         modelo.construir();
         ResultadoModelo r = modelo.resolver();
 
-        imprimirResultado(inst, r);
-        if (!arquivoCsv.empty()) salvarCsv(arquivoCsv, inst, r);
+        imprimirResultado(original, inst, r);
+        if (!arquivoCsv.empty()) salvarCsv(arquivoCsv, original, inst, r);
     } catch (const GRBException& e) {
         std::cerr << "Erro Gurobi (" << e.getErrorCode() << "): " << e.getMessage() << "\n";
         return 1;

@@ -39,6 +39,11 @@ struct Instancia {
     std::vector<Consumidor> consumidores;   // B
     std::vector<std::vector<double>> clo;   // clo[b][s] = c^lo_sb, s ∈ S̄
 
+    // aresta[b][s] = s pode atender b (preenchido pelo pré-processamento).
+    // Vazio = todas as arestas existem.
+    std::vector<std::vector<bool>> aresta;
+    bool temAresta(int b, int s) const { return aresta.empty() || aresta[b][s]; }
+
     int nS() const { return (int)companhia.size(); }
     int nSc() const { return (int)concorrentes.size(); }
     int nTotal() const { return nS() + nSc(); }  // |S̄|

@@ -13,7 +13,7 @@ CXXFLAGS := -std=c++17 -O2 -Wall -Wextra -Iinclude -I$(GUROBI_HOME)/include
 LDFLAGS  := -L$(GUROBI_HOME)/lib -Wl,-rpath,$(GUROBI_HOME)/lib
 LDLIBS   := -lgurobi_c++ -lgurobi120
 
-SRC := src/main.cpp src/modelo_pmcoi.cpp src/instancia.cpp
+SRC := src/main.cpp src/modelo_pmcoi.cpp src/instancia.cpp src/preprocessamento.cpp
 OBJ := $(SRC:src/%.cpp=build/%.o)
 BIN := bin/pmcoi
 
