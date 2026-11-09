@@ -36,6 +36,7 @@ ModeloPMCOI::ModeloPMCOI(const Instancia& inst, const ParametrosModelo& params)
     modelo_->set(GRB_StringAttr_ModelName, "PMCOI_" + inst_.nome);
     modelo_->set(GRB_DoubleParam_TimeLimit, params_.tempoLimite);
     modelo_->set(GRB_IntParam_Threads, params_.threads);
+    modelo_->set(GRB_DoubleParam_MIPGap, 0.0);  // só para no ótimo exato
 }
 
 std::string ModeloPMCOI::nome(const std::string& base) const {
